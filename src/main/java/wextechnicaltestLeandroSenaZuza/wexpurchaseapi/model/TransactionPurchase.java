@@ -7,16 +7,15 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "TAB_PURCHASE")
-@SequenceGenerator(name = "SEQUENCE", sequenceName = "TAB_S_PURCHASE", allocationSize = 1)
-public class Transaction {
+@Table(name = "TAB_TRANSACTION")
+public class TransactionPurchase {
 
     private static final long serialVersionUID = -4739518261390698938L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQUENCE")
     @Column(name = "CODG_TRANSACTION")
-    private Integer idTransaction;
+    private Long idTransaction;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "DATE_TRANSACTION", nullable = false)
     private Date transactionDate;
