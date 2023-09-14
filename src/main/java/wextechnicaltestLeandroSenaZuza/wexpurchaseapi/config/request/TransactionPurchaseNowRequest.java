@@ -1,16 +1,15 @@
 package wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.Date;
+import java.math.BigDecimal;
 
 @Data
-public class TransactionPurchaseRequest {
+public class TransactionPurchaseNowRequest {
     @NotNull
     @ApiModelProperty(value = "Purchase Amount")
-    private double purchaseAmount;
+    private BigDecimal purchaseAmount;
     private String description;
 }

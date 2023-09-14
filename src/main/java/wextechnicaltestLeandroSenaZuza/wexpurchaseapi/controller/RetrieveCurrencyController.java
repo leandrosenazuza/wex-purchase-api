@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.DecimalFormatException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.ConversionRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ConversionResponse;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateResponse;
@@ -36,7 +37,7 @@ public class RetrieveCurrencyController {
             @ApiResponse(code = 404, message = "Resource not found.")})
     @PostMapping(path = "/getPurchaseWithCurrency/{idTransaction}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ConversionResponse> getConvertedTransaction(@PathVariable Long idTransaction,
-                                                                      @RequestBody ConversionRequest request) throws Exception {
+                                                                      @RequestBody ConversionRequest request) throws Exception, DecimalFormatException {
         return ResponseEntity.ok(externalFiscalService.getConvertedCash(idTransaction, request));
     }
 }

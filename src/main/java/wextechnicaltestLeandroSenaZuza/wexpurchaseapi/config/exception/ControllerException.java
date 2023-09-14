@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ConvertException;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ErrorHandle;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.PersistErrorException;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ResourceNotFoundException;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,6 +34,22 @@ public class ControllerException {
         public  ResponseEntity<ErrorHandle>  handleConvertException(ConvertException exception) {
             ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(NotFoundException.class)
+    public  ResponseEntity<ErrorHandle>  handleEmptyTable(NotFoundException exception) {
+        ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(DecimalFormatException.class)
+    public  ResponseEntity<ErrorHandle>  handleConvertToDouble(DecimalFormatException exception) {
+        ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     }

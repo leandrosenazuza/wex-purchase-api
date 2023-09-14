@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -22,9 +23,9 @@ public class TransactionPurchaseDTO {
     private Long idTransaction;
     @JsonFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "Transaction's Date")
-    private Date transactionDate;
+    private String transactionDate;
     @ApiModelProperty(value = "Purchase Amount")
-    private double purchaseAmount;
+    private BigDecimal purchaseAmount;
     @ApiModelProperty(value = "Description")
     private String description;
 }

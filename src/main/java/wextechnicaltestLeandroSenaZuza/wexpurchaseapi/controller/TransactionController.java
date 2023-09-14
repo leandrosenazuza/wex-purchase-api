@@ -7,7 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.mapper.TransactionMapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.dto.TransactionPurchaseDTO;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseRequest;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseAnyTimeRequest;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseNowRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.service.TransactionService;
 
 import java.util.List;
@@ -50,8 +51,18 @@ public class TransactionController {
             @ApiResponse(code = 200, message = "Success!"),
             @ApiResponse(code = 400, message = "Bad Request!"),
             @ApiResponse(code = 404, message = "Resource not found.")})
-    @PostMapping(path = "/save", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createPurchase(@RequestBody TransactionPurchaseRequest request) throws Exception {
+    @PostMapping(path = "/saveNow", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createPurchaseTimeNow(@RequestBody TransactionPurchaseNowRequest request) throws Exception {
         return ResponseEntity.ok(this.transactionMapper.toDTO(transactionService.createPurchase(request)));
+    }
+
+    @ApiOperation(value = "Create one purchase in the Database.", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Success!"),
+            @ApiResponse(code = 400, message = "Bad Request!"),
+            @ApiResponse(code = 404, message = "Resource not found.")})
+    @PostMapping(path = "/save", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createPurchaseAnyTime(@RequestBody TransactionPurchaseAnyTimeRequest request) throws Exception {
+        return ResponseEntity.ok(this.transactionMapper.toDTO(transactionService.createPurchaseAnyTime(request)));
     }
 }
