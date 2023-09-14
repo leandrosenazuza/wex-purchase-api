@@ -24,17 +24,6 @@ public class RetrieveCurrencyController {
             @ApiResponse(code = 200, message = "Success!"),
             @ApiResponse(code = 400, message = "Bad Request!"),
             @ApiResponse(code = 404, message = "Resource not found.")})
-    @GetMapping(path = "/getOnePurchase/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getOneApiFiscal() throws Exception {
-        //
-        return ResponseEntity.ok().build();
-    }
-
-    @ApiOperation(value = "Get One Transactions", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Success!"),
-            @ApiResponse(code = 400, message = "Bad Request!"),
-            @ApiResponse(code = 404, message = "Resource not found.")})
     @PostMapping(path = "/getPurchaseWithCurrency/{idTransaction}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ConversionResponse> getConvertedTransaction(@PathVariable Long idTransaction,
                                                                       @RequestBody ConversionRequest request) throws Exception, DecimalFormatException {

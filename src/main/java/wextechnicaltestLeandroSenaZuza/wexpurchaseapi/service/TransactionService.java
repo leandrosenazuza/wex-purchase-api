@@ -6,12 +6,12 @@ import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.No
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.PersistErrorException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ResourceNotFoundException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.mapper.TransactionMapper;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.dto.TransactionPurchaseDTO;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseAnyTimeRequest;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseNowRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.model.TransactionPurchase;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.repository.TransactionRepository;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +60,7 @@ public class TransactionService {
         }
     }
 
-    public TransactionPurchase createPurchaseAnyTime(final TransactionPurchaseAnyTimeRequest request) throws Exception {
+    public TransactionPurchase createPurchase(final TransactionPurchaseRequest request) throws Exception {
         try{
             return transactionRepository.save(prepareToSaveWithPreDeterminetedTime(request));
         }catch (Exception e) {
@@ -69,29 +69,41 @@ public class TransactionService {
     }
 
     public TransactionPurchase prepareToSave(TransactionPurchaseNowRequest request) {
-        TransactionPurchaseDTO transactionPurchaseDTO = new TransactionPurchaseDTO();
+        TransactionPurchase transactionPurchase = new TransactionPurchase();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         Date currentDate = new Date();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = dateFormat.format(currentDate);
+        String formattedDate = sdf.format(currentDate);
 
-        transactionPurchaseDTO.setTransactionDate(formattedDate);
-        transactionPurchaseDTO.setPurchaseAmount(request.getPurchaseAmount());
+        try {
+            Date formattedDateAsDate = sdf.parse(formattedDate);
 
-        if (!request.getDescription().isEmpty()) {
-            transactionPurchaseDTO.setDescription(request.getDescription());
+            transactionPurchase.setTransactionDate(formattedDateAsDate);
+            transactionPurchase.setPurchaseAmount(request.getPurchaseAmount());
+            transactionPurchase.setDescription(request.getDescription());
+        } catch (ParseException e) {
+            throw new RuntimeException("Internal Error");
         }
 
-        return transactionMapper.toEntity(transactionPurchaseDTO);
+        return transactionPurchase;
     }
 
-    public TransactionPurchase prepareToSaveWithPreDeterminetedTime(TransactionPurchaseAnyTimeRequest request){
-        TransactionPurchaseDTO transactionPurchaseDTO = new TransactionPurchaseDTO();
-        transactionPurchaseDTO.setTransactionDate(request.getTransactionDate());
-        transactionPurchaseDTO.setPurchaseAmount(request.getPurchaseAmount());
-        if(!request.getDescription().isEmpty()) transactionPurchaseDTO.setDescription(request.getDescription());
-        return transactionMapper.toEntity(transactionPurchaseDTO);
+    public TransactionPurchase prepareToSaveWithPreDeterminetedTime(TransactionPurchaseRequest request){
+        TransactionPurchase transactionPurchase = new TransactionPurchase();
+        transactionPurchase.setDescription(request.getDescription());
+        transactionPurchase.setPurchaseAmount(request.getPurchaseAmount());
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+          Date date = formatter.parse(request.getTransactionDate());
+          transactionPurchase.setTransactionDate(date);
+        } catch (ParseException e) {
+            throw new RuntimeException("Error to parse date");
+        }
+
+        return transactionPurchase;
     }
 
 

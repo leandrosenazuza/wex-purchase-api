@@ -1,10 +1,12 @@
 package wextechnicaltestLeandroSenaZuza.wexpurchaseapi.service;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +14,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.dto.TransactionPurchaseDTO;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ConvertException;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.NotFoundException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.mapper.TransactionMapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.ConversionRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ConversionResponse;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateData;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateResponse;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.DecimalFormatException;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateResponseWrapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.model.TransactionPurchase;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 //TODO ● Ao converter entre moedas, você não precisa de uma correspondência exata de datas, mas deve usar uma taxa de conversão de moeda inferior ou igual à data da compra nos últimos 6 meses.
 //TODO ● Se não houver taxa de conversão de moeda disponível dentro de 6 meses igual ou antes da data da compra, um erro deve ser retornado informando que a compra não pode ser convertida para a moeda de destino.
@@ -47,19 +57,52 @@ public class ExternalFiscalService {
 
 
 
-    public ExchangeRateResponse requestFiscalAPI(String country, String date) throws Exception {
-        try{
-            ExchangeRateResponse response =  gson.fromJson(sendHttpRequest(country, date), ExchangeRateResponse.class);
-            return response;
-        }catch (Exception e){
-            throw new ConvertException("Error to convert JSON.");
+    public List<ExchangeRateData> requestFiscalAPI(String country, String date) throws Exception {
+        try {
+            String entityToBeJSON = sendHttpRequest(country, date);
+            System.out.print(entityToBeJSON);
+
+            ExchangeRateResponseWrapper responseWrapper = gson.fromJson(entityToBeJSON, ExchangeRateResponseWrapper.class);
+
+            List<ExchangeRateData> responseList = responseWrapper.getData();
+
+            return responseList;
+        } catch (Exception e) {
+            throw new ConvertException("Internal Error.");
+        }
+    }
+
+    private ConversionResponse getExchangeTransaction(ConversionRequest request, TransactionPurchaseDTO transactionDTO) throws Exception, DecimalFormatException {
+        List<ExchangeRateData> responseList = requestFiscalAPI(request.getCountry(), transactionDTO.getTransactionDate());
+
+        ConversionResponse responseConverted = new ConversionResponse();
+        responseConverted.setIdTransaction(transactionDTO.getIdTransaction());
+        responseConverted.setDescription(transactionDTO.getDescription());
+        responseConverted.setPurchaseAmount(transactionDTO.getPurchaseAmount());
+        responseConverted.setTransactionDate(transactionDTO.getTransactionDate());
+        responseConverted.setCountry(request.getCountry());
+
+        String exchangeRate = getExchangeRateByRecordDate(responseList, transactionDTO.getTransactionDate());
+
+        if (exchangeRate != null) {
+            responseConverted.setExchange_rate(toSpecifyAnExchangeRate(exchangeRate));
+            responseConverted.setConvertedAmount(convertAmountByExchangeRate(transactionDTO.getPurchaseAmount(), exchangeRate));
+        } else {
+
+            throw new NotFoundException("There is no exchange rate data available.");
         }
 
+        return responseConverted;
     }
+
+
 
     public String sendHttpRequest(String country, String date) throws Exception {
         HttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(getUrlBuilder(country, date));
+        String urlRequest = getUrlBuilder(country, date);
+        HttpGet httpGet = new HttpGet();
+        URIBuilder builder = new URIBuilder(urlRequest);
+        httpGet.setURI(builder.build());
 
         try{
             HttpResponse httpResponse = httpClient.execute(httpGet);
@@ -75,18 +118,24 @@ public class ExternalFiscalService {
     }
 
     public String getUrlBuilder(String country, String date){
+        String lastSixMonth = getLastSixMonths(date);
         return URL
-                + "?fields="
-                + getSearchFields("exchange_rate")
-                + "&filter="
-                + getFilter(country, date);
+                + "?fields=country,record_date,exchange_rate&filter=record_date:gte:" + lastSixMonth +",record_date:lte:"+ date +",country:in:("+ country +")&sort=-record_date";
     }
 
-    public String getSearchFields(String field){
-        return field;
-    }
-    public String getFilter(String country, String date){
-        return "country:in:("+country+"),record_date:eq:"+date;
+    private String getLastSixMonths(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+
+        try {
+            Date data = sdf.parse(date);
+            calendar.setTime(data);
+            calendar.add(Calendar.MONTH, -6);
+            String formatedDate = sdf.format(calendar.getTime());
+            return formatedDate.toString();
+        } catch (ParseException e) {
+            throw new ConvertException("Error to convert Date");
+        }
     }
 
     public ConversionResponse getConvertedCash(Long idTransaction, ConversionRequest request) throws Exception, DecimalFormatException {
@@ -113,23 +162,17 @@ public class ExternalFiscalService {
         return formattedDate;
     }
 
-    private ConversionResponse getExchangeTransaction(ConversionRequest request, TransactionPurchaseDTO transactionDTO) throws Exception, DecimalFormatException {
-        ExchangeRateResponse exchangeRateResponse = requestFiscalAPI(request.getCountry(), transactionDTO.getTransactionDate());
-        ConversionResponse responseConverted = new ConversionResponse();
-        responseConverted.setIdTransaction(transactionDTO.getIdTransaction());
-        responseConverted.setDescription(transactionDTO.getDescription());
-        responseConverted.setPurchaseAmount(transactionDTO.getPurchaseAmount());
-        responseConverted.setTransactionDate(transactionDTO.getTransactionDate());
-        responseConverted.setCountry(request.getCountry());
 
-        if(exchangeRateResponse.getData() != null){
-            responseConverted.setExchange_rate(toSpecifyAnExchangeRate(exchangeRateResponse.getData().get(0).getExchange_rate()));
+    private String getExchangeRateByRecordDate(List<ExchangeRateData> exchangeRateResponseList, String targetRecordDate) {
+        for (ExchangeRateData exchangeRateData : exchangeRateResponseList) {
+                    if (targetRecordDate.equals(exchangeRateData.getRecord_date())) {
+                        return exchangeRateData.getExchange_rate();
+                    }
         }
-
-        responseConverted.setConvertedAmount(convertAmountByExchangeRate(transactionDTO.getPurchaseAmount(), exchangeRateResponse.getData().get(0).getExchange_rate()));
-
-        return responseConverted;
+        return null;
     }
+
+
 
     private String toSpecifyAnExchangeRate(String data) throws DecimalFormatException {
         System.out.print(data);
