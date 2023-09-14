@@ -25,7 +25,7 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    public TransactionPurchase findById(Long id) throws Exception {
+    public TransactionPurchase findById(Long id){
         if (Objects.isNull(id)) {
             throw new IllegalArgumentException("You have to inform the id");
         }
@@ -38,9 +38,8 @@ public class TransactionService {
 
         return optional.get();
 
-
     }
-    public List<TransactionPurchase> findAll() throws Exception {
+    public List<TransactionPurchase> findAll() {
 
         final List<TransactionPurchase> optionalList = this.transactionRepository.findAll();
 
@@ -68,23 +67,16 @@ public class TransactionService {
         }
     }
 
-    public TransactionPurchase prepareToSave(TransactionPurchaseNowRequest request) {
+    public TransactionPurchase prepareToSave(TransactionPurchaseNowRequest request) throws ParseException {
         TransactionPurchase transactionPurchase = new TransactionPurchase();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         Date currentDate = new Date();
-
         String formattedDate = sdf.format(currentDate);
-
-        try {
-            Date formattedDateAsDate = sdf.parse(formattedDate);
-
-            transactionPurchase.setTransactionDate(formattedDateAsDate);
-            transactionPurchase.setPurchaseAmount(request.getPurchaseAmount());
-            transactionPurchase.setDescription(request.getDescription());
-        } catch (ParseException e) {
-            throw new RuntimeException("Internal Error");
-        }
+        Date formattedDateAsDate = sdf.parse(formattedDate);
+        transactionPurchase.setTransactionDate(formattedDateAsDate);
+        transactionPurchase.setPurchaseAmount(request.getPurchaseAmount());
+        transactionPurchase.setDescription(request.getDescription());
 
         return transactionPurchase;
     }

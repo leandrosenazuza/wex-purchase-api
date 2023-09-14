@@ -54,10 +54,7 @@ public class ExternalFiscalService {
 
     Gson gson = new Gson();
 
-
-
-
-    public List<ExchangeRateData> requestFiscalAPI(String country, String date) throws Exception {
+    public List<ExchangeRateData> requestFiscalAPI(String country, String date){
         try {
             String entityToBeJSON = sendHttpRequest(country, date);
             System.out.print(entityToBeJSON);
@@ -72,9 +69,15 @@ public class ExternalFiscalService {
         }
     }
 
-    private ConversionResponse getExchangeTransaction(ConversionRequest request, TransactionPurchaseDTO transactionDTO) throws Exception, DecimalFormatException {
+    private ConversionResponse getExchangeTransaction(ConversionRequest request, TransactionPurchaseDTO transactionDTO) throws DecimalFormatException {
         List<ExchangeRateData> responseList = requestFiscalAPI(request.getCountry(), transactionDTO.getTransactionDate());
 
+        ConversionResponse responseConverted = getConversionResponse(request, transactionDTO, responseList);
+
+        return responseConverted;
+    }
+
+    private ConversionResponse getConversionResponse(ConversionRequest request, TransactionPurchaseDTO transactionDTO, List<ExchangeRateData> responseList) throws DecimalFormatException {
         ConversionResponse responseConverted = new ConversionResponse();
         responseConverted.setIdTransaction(transactionDTO.getIdTransaction());
         responseConverted.setDescription(transactionDTO.getDescription());
@@ -88,13 +91,10 @@ public class ExternalFiscalService {
             responseConverted.setExchange_rate(toSpecifyAnExchangeRate(exchangeRate));
             responseConverted.setConvertedAmount(convertAmountByExchangeRate(transactionDTO.getPurchaseAmount(), exchangeRate));
         } else {
-
-            throw new NotFoundException("There is no exchange rate data available.");
+            throw new NotFoundException("There is no exchange rate data available or the name of the country is incorrect.");
         }
-
         return responseConverted;
     }
-
 
 
     public String sendHttpRequest(String country, String date) throws Exception {
@@ -110,7 +110,7 @@ public class ExternalFiscalService {
             if (httpEntity.getContent() != null) {
                 return EntityUtils.toString(httpEntity);
             } else {
-                throw new Exception("Not found any exange");
+                throw new Exception("Not found any exchange");
             }
         }catch (Exception e){
             throw new Exception(e.getMessage());

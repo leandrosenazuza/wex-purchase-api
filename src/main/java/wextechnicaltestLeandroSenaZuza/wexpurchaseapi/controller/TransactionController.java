@@ -46,7 +46,7 @@ public class TransactionController {
     }
 
     @ApiOperation(value = "Create one purchase in the Database.", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses({
+    @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success!"),
             @ApiResponse(code = 400, message = "Bad Request!"),
             @ApiResponse(code = 404, message = "Resource not found.")})
@@ -54,4 +54,5 @@ public class TransactionController {
     public ResponseEntity<?> createPurchaseAnyTime(@RequestBody TransactionPurchaseRequest request) throws Exception {
         return ResponseEntity.ok(transactionService.createPurchase(request));
     }
+
 }

@@ -14,8 +14,6 @@ import java.util.Date;
 @Table(name = "TAB_TRANSACTION")
 public class TransactionPurchase {
 
-    //private static final long serialVersionUID = -4739518261390698938L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODG_TRANSACTION")
