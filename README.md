@@ -45,7 +45,6 @@ date, and a purchase amount in United States dollars. When the transaction is st
 <h2>#How to use the request?</h2>
 <ul>
 <li><b>/save</b> request persit one purchase in the database.</li>
-<li><b>/getConvertedTransaction</b> request persit one purchase in the database.</li>
 <li><b>/listAllPurchase</b> list all transactions persisted in the database </li>
 <li><b>/getOnePurchase/{id}</b> get id's transaction </li>
 <li><b>/getPurchaseWithCurrency/{id}</b> get id's transaction <i>converted</i> to respective exchange date, if it exist.</li>
