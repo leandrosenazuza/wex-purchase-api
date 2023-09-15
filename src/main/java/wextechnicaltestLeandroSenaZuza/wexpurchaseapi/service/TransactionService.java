@@ -2,12 +2,11 @@ package wextechnicaltestLeandroSenaZuza.wexpurchaseapi.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.BadParamRequestException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.NotFoundException;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.PersistErrorException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ResourceNotFoundException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.mapper.TransactionMapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseRequest;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.TransactionPurchaseNowRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.model.TransactionPurchase;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.repository.TransactionRepository;
 
@@ -51,34 +50,9 @@ public class TransactionService {
 
     }
 
-    public TransactionPurchase createPurchase(final TransactionPurchaseNowRequest request) throws Exception {
-        try{
-            return transactionRepository.save(prepareToSave(request));
-        }catch (Exception e) {
-            throw new PersistErrorException("Error to persist the Transaction.");
-        }
-    }
-
-    public TransactionPurchase createPurchase(final TransactionPurchaseRequest request) throws Exception {
-        try{
-            return transactionRepository.save(prepareToSaveWithPreDeterminetedTime(request));
-        }catch (Exception e) {
-            throw new PersistErrorException("Error to persist the Transaction.");
-        }
-    }
-
-    public TransactionPurchase prepareToSave(TransactionPurchaseNowRequest request) throws ParseException {
-        TransactionPurchase transactionPurchase = new TransactionPurchase();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date currentDate = new Date();
-        String formattedDate = sdf.format(currentDate);
-        Date formattedDateAsDate = sdf.parse(formattedDate);
-        transactionPurchase.setTransactionDate(formattedDateAsDate);
-        transactionPurchase.setPurchaseAmount(request.getPurchaseAmount());
-        transactionPurchase.setDescription(request.getDescription());
-
-        return transactionPurchase;
+    public TransactionPurchase createPurchase(final TransactionPurchaseRequest request) {
+        TransactionPurchase transactionPurchase = prepareToSaveWithPreDeterminetedTime(request);
+        return transactionRepository.save(transactionPurchase);
     }
 
     public TransactionPurchase prepareToSaveWithPreDeterminetedTime(TransactionPurchaseRequest request){
@@ -92,11 +66,11 @@ public class TransactionService {
           Date date = formatter.parse(request.getTransactionDate());
           transactionPurchase.setTransactionDate(date);
         } catch (ParseException e) {
-            throw new RuntimeException("Error to parse date");
+            throw new BadParamRequestException("You are passing not valid values in the request. Your date should be in the format: yyyy-MM-dd");
+
         }
 
         return transactionPurchase;
     }
-
 
 }

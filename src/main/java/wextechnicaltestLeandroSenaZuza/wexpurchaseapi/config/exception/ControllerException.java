@@ -1,17 +1,11 @@
 package wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception;
 
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.*;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestControllerAdvice
 public class ControllerException {
@@ -29,20 +23,19 @@ public class ControllerException {
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-        @ExceptionHandler(ConvertException.class)
-        public  ResponseEntity<ErrorHandle>  handleConvertException(ConvertException exception) {
-            ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        @ExceptionHandler(BadParamRequestException.class)
+        public  ResponseEntity<ErrorHandle>  handleConvertException(BadParamRequestException exception) {
+            ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     public  ResponseEntity<ErrorHandle>  handleEmptyTable(NotFoundException exception) {
         ErrorHandle errorResponse = new ErrorHandle(exception.getMessage(), HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
-
 
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

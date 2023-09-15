@@ -7,16 +7,19 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionPurchaseRequest {
 
     @NotNull
-    @DecimalMax(value = "10000", inclusive = false, message = "Purchase amount must be less than 10,000.00")
+    @DecimalMax(value = "100000", inclusive = true, message = "Purchase amount must be less than 100,000.00")
     @ApiModelProperty(value = "Purchase Amount")
     private BigDecimal purchaseAmount;
     @NotBlank(message = "Transaction date must not be blank!")
@@ -24,4 +27,5 @@ public class TransactionPurchaseRequest {
     private String transactionDate;
     @Size(max = 50, message = "Description must be at most 50 characters")
     private String description;
+
 }

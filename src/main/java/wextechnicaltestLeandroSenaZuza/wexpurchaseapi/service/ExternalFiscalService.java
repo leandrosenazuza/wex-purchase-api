@@ -1,7 +1,6 @@
 package wextechnicaltestLeandroSenaZuza.wexpurchaseapi.service;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -13,21 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.dto.TransactionPurchaseDTO;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.ConvertException;
+import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.BadParamRequestException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.NotFoundException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.mapper.TransactionMapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.request.ConversionRequest;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ConversionResponse;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateData;
-import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateResponse;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.exception.errors.DecimalFormatException;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.config.response.ExchangeRateResponseWrapper;
 import wextechnicaltestLeandroSenaZuza.wexpurchaseapi.model.TransactionPurchase;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +61,7 @@ public class ExternalFiscalService {
 
             return responseList;
         } catch (Exception e) {
-            throw new ConvertException("Internal Error.");
+            throw new BadParamRequestException("Internal Error.");
         }
     }
 
@@ -134,7 +130,7 @@ public class ExternalFiscalService {
             String formatedDate = sdf.format(calendar.getTime());
             return formatedDate.toString();
         } catch (ParseException e) {
-            throw new ConvertException("Error to convert Date");
+            throw new BadParamRequestException("Error to convert Date");
         }
     }
 
