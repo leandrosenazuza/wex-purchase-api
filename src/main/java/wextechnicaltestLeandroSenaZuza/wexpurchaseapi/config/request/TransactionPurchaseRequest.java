@@ -23,7 +23,7 @@ public class TransactionPurchaseRequest {
     @ApiModelProperty(value = "Purchase Amount")
     private BigDecimal purchaseAmount;
     @NotBlank(message = "Transaction date must not be blank!")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private String transactionDate;
     @Size(max = 50, message = "Description must be at most 50 characters")
     private String description;

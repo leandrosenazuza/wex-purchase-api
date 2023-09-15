@@ -160,12 +160,20 @@ public class ExternalFiscalService {
 
 
     private String getExchangeRateByRecordDate(List<ExchangeRateData> exchangeRateResponseList, String targetRecordDate) {
+        String exchangeRate = null;
+        boolean notFoundExactDate = false;
         for (ExchangeRateData exchangeRateData : exchangeRateResponseList) {
-                    if (targetRecordDate.equals(exchangeRateData.getRecord_date())) {
-                        return exchangeRateData.getExchange_rate();
-                    }
+            if (targetRecordDate.equals(exchangeRateData.getRecord_date())) {
+                exchangeRate = exchangeRateData.getExchange_rate();
+                return exchangeRate;
+            } else if (notFoundExactDate && (exchangeRateData.getRecord_date() != null)) {
+                exchangeRate = exchangeRateData.getExchange_rate();
+                return exchangeRate;
+            }
+            notFoundExactDate = true;
         }
         return null;
+
     }
 
 
